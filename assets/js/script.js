@@ -5,8 +5,28 @@ const resultsModal = new bootstrap.Modal(document.getElementById("resultsModal")
 document.getElementById("status").addEventListener("click", e => getStatus(e));
 document.getElementById("submit").addEventListener("click", e => postForm(e));
 
+function processOptions(form) {
+
+    let optArray = [];
+
+    for (let entry of form.entries()) {
+        if (entry[0] === "options") {
+            optArray.push(entry[1]);
+        }
+    }
+    form.delete("options");
+
+    form.append("options", optArray.join());
+
+    return form;
+}
+
 async function postForm(e) {
-    const form = new FormData(document.getElementById("checksform"));
+    const form = processOptions(new FormData(document.getElementById("checksform")));
+
+    //for (let entry of form.entries()) {
+      //  console.log(entry);
+    //}
 
     //for(let e of form.entries()) {
         //console.log(e);
@@ -26,6 +46,7 @@ async function postForm(e) {
         displayErrors(data);
         //console.log(data);
     } else {
+        displayException(data);
         throw new Error(data.error);
     }
 }
@@ -62,6 +83,7 @@ async function getStatus(e) {
         displayStatus(data);
         //console.log(data.expiry);
     } else {
+        displayException(data);
         throw new Error(data.error);
     }
 }
@@ -75,4 +97,19 @@ function displayStatus(data) {
     document.getElementById("results-content").innerHTML = results;
 
     resultsModal.show()
+}
+
+function displayException(data) {
+
+    let heading = `An Exception Occurred`;
+
+    results = `<div>The API returned status code ${data.status_code}</div>`;
+    results += `<div>Error number: <strong>${data.error_no}</strong></div>`;
+    results += `<div>Error text: <strong>${data.error}</strong></div>`;
+
+    document.getElementById("resultsModalTitle").innerText = heading;
+    document.getElementById("results-content").innerHTML = results;
+    
+    resultsModal.show();
+
 }
